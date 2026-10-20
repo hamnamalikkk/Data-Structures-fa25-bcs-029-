@@ -1,0 +1,137 @@
+
+#include <iostream>
+using namespace std;
+
+struct Node
+{
+    int data;
+    Node* left;
+    Node* right;
+};
+
+Node* createNode(int value)
+{
+    Node* newNode = new Node;
+    newNode->data = value;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+Node* insert(Node* root, int value)
+{
+    if (root == NULL)
+        return createNode(value);
+
+    if (value < root->data)
+        root->left = insert(root->left, value);
+    else if (value > root->data)
+        root->right = insert(root->right, value);
+
+    return root;
+}
+
+// Find the smallest node
+Node* findMin(Node* root)
+{
+    while (root->left != NULL)
+        root = root->left;
+
+    return root;
+}
+
+// Delete a node
+Node* deleteNode(Node* root, int key)
+{
+    if (root == NULL)
+        return root;
+
+    if (key < root->data)
+    {
+        root->left = deleteNode(root->left, key);
+    }
+    else if (key > root->data)
+    {
+        root->right = deleteNode(root->right, key);
+    }
+    else
+    {
+        // Case 1: No children
+        if (root->left == NULL &&
+            root->right == NULL)
+        {
+            delete root;
+            return NULL;
+        }
+
+        // Case 2: Only right child
+        else if (root->left == NULL)
+        {
+            Node* temp = root->right;
+            delete root;
+            return temp;
+        }
+
+        // Case 2: Only left child
+        else if (root->right == NULL)
+        {
+            Node* temp = root->left;
+            delete root;
+            return temp;
+        }
+
+        // Case 3: Two children
+        else
+        {
+            Node* temp = findMin(root->right);
+
+            root->data = temp->data;
+
+            root->right = deleteNode(root->right,
+                                     temp->data);
+        }
+    }
+
+    return root;
+}
+
+// Inorder traversal
+void inorder(Node* root)
+{
+    if (root != NULL)
+    {
+        inorder(root->left);
+        cout << root->data << " ";
+        inorder(root->right);
+    }
+}
+
+int main()
+{
+    Node* root = NULL;
+
+    root = insert(root, 50);
+    root = insert(root, 30);
+    root = insert(root, 70);
+    root = insert(root, 20);
+    root = insert(root, 40);
+    root = insert(root, 60);
+    root = insert(root, 80);
+
+    cout << "Original BST: ";
+    inorder(root);
+
+    root = deleteNode(root, 20);
+    cout << "\nAfter deleting leaf 20: ";
+    inorder(root);
+
+    root = deleteNode(root, 30);
+    cout << "\nAfter deleting node 30: ";
+    inorder(root);
+
+    root = deleteNode(root, 50);
+    cout << "\nAfter deleting root 50: ";
+    inorder(root);
+
+    return 0;
+}
