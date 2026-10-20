@@ -1,0 +1,181 @@
+
+#include <iostream>
+using namespace std;
+
+struct Node
+{
+    int data;
+    int height;
+    Node* left;
+    Node* right;
+};
+
+int height(Node* ptr)
+{
+    if (ptr == NULL)
+        return 0;
+
+    return ptr->height;
+}
+
+int max(int a, int b)
+{
+    if (a > b)
+        return a;
+
+    return b;
+}
+
+Node* createNode(int value)
+{
+    Node* newNode = new Node;
+
+    newNode->data = value;
+    newNode->height = 1;
+    newNode->left = NULL;
+    newNode->right = NULL;
+
+    return newNode;
+}
+
+int getBalance(Node* ptr)
+{
+    if (ptr == NULL)
+        return 0;
+
+    return height(ptr->left) - height(ptr->right);
+}
+
+// LL Case: Right Rotation
+Node* rightRotate(Node* ptr)
+{
+    Node* ptr1 = ptr->left;
+    Node* ptr2 = ptr1->right;
+
+    ptr1->right = ptr;
+    ptr->left = ptr2;
+
+    ptr->height = 1 + max(height(ptr->left),
+                          height(ptr->right));
+
+    ptr1->height = 1 + max(height(ptr1->left),
+                           height(ptr1->right));
+
+    return ptr1;
+}
+
+// RR Case: Left Rotation
+Node* leftRotate(Node* ptr)
+{
+    Node* ptr1 = ptr->right;
+    Node* ptr2 = ptr1->left;
+
+    ptr1->left = ptr;
+    ptr->right = ptr2;
+
+    ptr->height = 1 + max(height(ptr->left),
+                          height(ptr->right));
+
+    ptr1->height = 1 + max(height(ptr1->left),
+                           height(ptr1->right));
+
+    return ptr1;
+}
+
+// Insert and balance the AVL Tree
+Node* insert(Node* root, int value)
+{
+    if (root == NULL)
+        return createNode(value);
+
+    if (value < root->data)
+        root->left = insert(root->left, value);
+    else if (value > root->data)
+        root->right = insert(root->right, value);
+    else
+        return root;
+
+    root->height = 1 + max(height(root->left),
+                           height(root->right));
+
+    int balance = getBalance(root);
+
+    // LL Case
+    if (balance > 1 &&
+        value < root->left->data)
+        return rightRotate(root);
+
+    // RR Case
+    if (balance < -1 &&
+        value > root->right->data)
+        return leftRotate(root);
+
+    // LR Case
+    if (balance > 1 &&
+        value > root->left->data)
+    {
+        root->left = leftRotate(root->left);
+        return rightRotate(root);
+    }
+
+    // RL Case
+    if (balance < -1 &&
+        value < root->right->data)
+    {
+        root->right = rightRotate(root->right);
+        return leftRotate(root);
+    }
+
+    return root;
+}
+
+// Display the tree sideways
+void display(Node* root, int space = 0)
+{
+    if (root == NULL)
+        return;
+
+    space += 5;
+
+    display(root->right, space);
+
+    cout << endl;
+
+    for (int i = 5; i < space; i++)
+        cout << " ";
+
+    cout << root->data << endl;
+
+    display(root->left, space);
+}
+
+// Test one rotation case
+void testRotation(int a, int b, int c)
+{
+    Node* root = NULL;
+
+    root = insert(root, a);
+    root = insert(root, b);
+    root = insert(root, c);
+
+    cout << "\nFinal AVL Tree:";
+    display(root);
+    cout << "\n--------------------\n";
+}
+
+int main()
+{
+    cout << "LL Case: 30, 20, 10\n";
+    testRotation(30, 20, 10);
+
+    cout << "RR Case: 10, 20, 30\n";
+    testRotation(10, 20, 30);
+
+    cout << "LR Case: 30, 10, 20\n";
+    testRotation(30, 10, 20);
+
+    cout << "RL Case: 10, 30, 20\n";
+    testRotation(10, 30, 20);
+
+    return 0;
+}
